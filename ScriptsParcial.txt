@@ -1,0 +1,203 @@
+USE [ISIL_SOFT]
+GO
+
+/****** Object:  Table [dbo].[Usuario]    Script Date: 18/10/2023 23:35:11 ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TABLE [dbo].[Usuario](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+	[correo] [varchar](100) NULL,
+	[nombre] [varchar](40) NULL,
+	[apePaterno] [varchar](40) NULL,
+	[apeMaterno] [varchar](40) NULL,
+	[direccion] [varchar](100) NULL,
+	[password] [varchar](20) NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+
+/*============================================*/
+USE [ISIL_SOFT]
+GO
+
+/****** Object:  StoredProcedure [dbo].[InsertarUsuario]    Script Date: 18/10/2023 23:35:33 ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- Crear un procedimiento almacenado para insertar un nuevo usuario
+CREATE PROCEDURE [dbo].[InsertarUsuario]
+    @correo VARCHAR(100),
+    @nombre VARCHAR(40),
+    @apePaterno VARCHAR(40),
+    @apeMaterno VARCHAR(40),
+    @direccion VARCHAR(100),
+    @password VARCHAR(20)
+AS
+BEGIN
+    INSERT INTO Usuario (correo, nombre, apePaterno, apeMaterno, direccion, password)
+    VALUES (@correo, @nombre, @apePaterno, @apeMaterno, @direccion, @password);
+END;
+GO
+/*============================================*/
+USE [ISIL_SOFT]
+GO
+
+/****** Object:  StoredProcedure [dbo].[ObtenerUsuarioPorCorreo]    Script Date: 18/10/2023 23:35:49 ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- Crear un procedimiento almacenado para obtener un usuario por correo
+CREATE PROCEDURE [dbo].[ObtenerUsuarioPorCorreo]
+    @correo VARCHAR(100)
+AS
+BEGIN
+    SELECT *
+    FROM Usuario
+    WHERE correo = @correo;
+END;
+GO
+/*============================================*/
+USE [ISIL_SOFT]
+GO
+
+/****** Object:  StoredProcedure [dbo].[RegistrarUsuario]    Script Date: 18/10/2023 23:36:04 ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- Crear un procedimiento almacenado para registrar un nuevo usuario sin verificar el correo
+CREATE PROCEDURE [dbo].[RegistrarUsuario]
+    @correo VARCHAR(100),
+    @nombre VARCHAR(40),
+    @apePaterno VARCHAR(40),
+    @apeMaterno VARCHAR(40),
+    @direccion VARCHAR(100),
+    @password VARCHAR(20)
+AS
+BEGIN
+    -- Insertar el nuevo usuario sin verificar el correo
+    INSERT INTO Usuario (correo, nombre, apePaterno, apeMaterno, direccion, password)
+    VALUES (@correo, @nombre, @apePaterno, @apeMaterno, @direccion, @password);
+END;
+GO
+/*============================================*/
+USE [ISIL_SOFT]
+GO
+
+/****** Object:  StoredProcedure [dbo].[ValidarCorreoYObtenerContraseña]    Script Date: 18/10/2023 23:36:32 ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[ValidarCorreoYObtenerContraseña]
+    @correo VARCHAR(100),
+    @contrasena VARCHAR(20) OUTPUT,
+    @esValido BIT OUTPUT
+AS
+BEGIN
+    -- Inicializar las variables de salida
+    SET @contrasena = '';
+    SET @esValido = 0;
+
+    -- Verificar si el correo existe
+    IF EXISTS (
+        SELECT 1
+        FROM Usuario
+        WHERE correo = @correo
+    )
+    BEGIN
+        -- El correo es válido, obtener la contraseña
+        SELECT @contrasena = password
+        FROM Usuario
+        WHERE correo = @correo;
+
+        SET @esValido = 1;
+    END
+END;
+GO
+/*============================================*/
+USE [ISIL_SOFT]
+GO
+
+/****** Object:  StoredProcedure [dbo].[ValidarCredenciales]    Script Date: 18/10/2023 23:36:55 ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- Crear un procedimiento almacenado para validar el correo y contraseña
+CREATE PROCEDURE [dbo].[ValidarCredenciales]
+    @correo VARCHAR(100),
+    @password VARCHAR(20),
+    @UsuarioValido BIT OUTPUT
+AS
+BEGIN
+    SET @UsuarioValido = 0; -- Por defecto, consideramos que el usuario no es válido
+
+    -- Verificar si las credenciales son válidas
+    IF EXISTS (
+        SELECT 1
+        FROM Usuario
+        WHERE correo = @correo
+        AND password = @password
+    )
+    BEGIN
+        SET @UsuarioValido = 1; -- Si las credenciales son válidas, establecemos @UsuarioValido en 1
+    END
+END;
+GO
+/*============================================*/USE [ISIL_SOFT]
+GO
+
+/****** Object:  StoredProcedure [dbo].[ValidarUsuarioPorCorreo]    Script Date: 18/10/2023 23:37:06 ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[ValidarUsuarioPorCorreo]
+    @correo VARCHAR(100),
+    @UsuarioValido BIT OUTPUT
+AS
+BEGIN
+    SET @UsuarioValido = 0; -- Por defecto, consideramos que el usuario no es válido
+
+    -- Verificar si el correo existe en la tabla "Usuario"
+    IF EXISTS (
+        SELECT 1
+        FROM Usuario
+        WHERE correo = @correo
+    )
+    BEGIN
+        SET @UsuarioValido = 1; -- Si el correo existe, establecemos @UsuarioValido en 1
+    END
+END;
+
+
+
+select * from Usuario
+GO
+
+
+
+
+
